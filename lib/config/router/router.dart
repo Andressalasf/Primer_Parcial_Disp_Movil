@@ -1,7 +1,6 @@
 import 'package:primer_parcial_disp_moviles/config/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:primer_parcial_disp_moviles/presentation/screens/screen.dart';
-import 'package:primer_parcial_disp_moviles/presentation/screens/home/home.dart';
 
 class Routers {
   static final List<AppRouter> pages = [
@@ -18,6 +17,13 @@ class Routers {
       description: "Form page",
       icon: Icons.note_alt,
       context: (context) => const FormScreen(),
+    ),
+    AppRouter(
+      path: "peticion",
+      title: "Peticion",
+      description: "Peticion page",
+      icon: Icons.request_page,
+      context: (context) => const PeticionScreen(),
     ),
   ];
 
