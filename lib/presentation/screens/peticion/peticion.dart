@@ -1,5 +1,5 @@
-import 'package:primer_parcial_disp_moviles/helpers/naruto_peticion.dart';
-import 'package:primer_parcial_disp_moviles/model/naruto_character.dart';
+import 'package:primer_parcial_disp_moviles/helpers/dragon_ball_petition.dart';
+import 'package:primer_parcial_disp_moviles/model/dragon_ball_character.dart';
 import 'package:flutter/material.dart';
 
 class PeticionScreen extends StatelessWidget {
@@ -7,50 +7,40 @@ class PeticionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final petition = NarutoPeticion();
+    final petition = DragonBallPetition();
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: const Text(
-            'Peticion Screen',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          child: Text(
+            "Dragon ball characters",
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        backgroundColor: Colors.indigoAccent,
+        backgroundColor: Colors.orange,
         iconTheme: IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushNamed(context, '/');
+          },
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsetsGeometry.all(8.0),
         child: FutureBuilder(
-          future: petition.getCharacter(),
+          future: petition.getCharacters(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Error: ${snapshot.error}'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Recargar la página
-                        Navigator.pushReplacementNamed(context, 'peticion');
-                      },
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
+              return Center(child: Text('Error: ${snapshot.error}'));
             }
-            if (snapshot.hasData) {
-              return ListCharacter(characters: snapshot.data!);
-            }
-            return const Center(child: Text('No hay datos disponibles'));
+            return ListCharacter(character: snapshot.requireData);
           },
         ),
       ),
@@ -59,58 +49,97 @@ class PeticionScreen extends StatelessWidget {
 }
 
 class ListCharacter extends StatelessWidget {
-  final List<NarutoCharacter> characters;
-  const ListCharacter({super.key, required this.characters});
+  final List<DragonBallCharacter> character;
+
+  const ListCharacter({super.key, required this.character});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: characters.length,
+      itemCount: character.length,
       itemBuilder: (context, index) {
-        final character = characters[index];
-
-        // Versión simple con Card
+        final size = MediaQuery.of(context).size;
+        DragonBallCharacter pj = character[index];
         return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            onTap: () {
+              print("Di tap hermano");
+            },
+            contentPadding: EdgeInsets.all(16),
+            title: Row(
               children: [
-                // Imagen del personaje (simple)
-                CircleAvatar(
-                  radius: 30, // Tamaño del círculo
-                  backgroundImage:
-                      character.images.isNotEmpty &&
-                          character.images[0].isNotEmpty
-                      ? NetworkImage(
-                          character.images[0],
-                        ) // Si hay imagen, la muestra
-                      : null, // Si no hay imagen, no muestra nada
-                  backgroundColor:
-                      Colors.grey[300], // Color de fondo si no hay imagen
-                  child: character.images.isEmpty || character.images[0].isEmpty
-                      ? const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                        ) // Ícono si no hay imagen
-                      : null, // Si hay imagen, no muestra ícono
+                Container(
+                  width: size.width * 0.15,
+                  height: size.width * 0.15,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[300],
+                  ),
+                  child:
+                      pj.image.isNotEmpty &&
+                          pj.image != "no image" &&
+                          pj.image != "No image"
+                      ? CircleAvatar(
+                          radius: (size.width * 0.15) / 2,
+                          backgroundColor: Colors.grey[300],
+                          child: Image.network(
+                            pj.image,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.error,
+                                color: Colors.red[400],
+                                size: 30,
+                              );
+                            },
+                          ),
+                        )
+                      : Icon(Icons.person, color: Colors.white, size: 30),
                 ),
-                const SizedBox(width: 16), // Espacio entre imagen y texto
-                // Informacion del personaje
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        character.name,
-                        style: const TextStyle(
-                          fontSize: 18,
+                        pj.name,
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text('ID: ${character.id}'),
-                      Text('Tools: ${character.tools.length}'),
+                      SizedBox(height: 8),
+                      Text(
+                        'Ki del personaje:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8.0,
+                        runSpacing: 8.0,
+                        children: pj.ki.split(',').map((res) {
+                          return Chip(
+                            label: Text(res),
+                            backgroundColor: Colors.orange[100],
+                            labelStyle: TextStyle(fontSize: 12),
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        pj.description,
+                        style: TextStyle(fontSize: 12),
+                        maxLines: 6,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
@@ -123,11 +152,18 @@ class ListCharacter extends StatelessWidget {
   }
 }
 
-//entity es la clase que representa los datos y sus atributos
-//repository es la clase que maneja la logica de datos
-//model es la clase que convierte los datos de json a entity y ademas maneja la logica de datos
-//helpers es la clase que maneja las peticiones http y la conexion a internet y ademas contiene funciones auxiliares para el manejo de datos
-// CORS es un mecanismo de seguridad que implementan los navegadores para evitar que una página web pueda hacer peticiones a un dominio diferente al que la sirvió. Esto se hace para proteger al usuario de ataques de tipo cross-site scripting (XSS) y cross-site request forgery (CSRF).
-// En Flutter, al ser una aplicación móvil, no se aplican las mismas restricciones de CORS que en una aplicación web. Por lo tanto, no es necesario configurar CORS en Flutter para hacer peticiones a diferentes dominios.
-//snapshot es un objeto que contiene el estado actual de la petición asincrona, incluyendo si se esta cargando, si se completo con exito o si hubo un error
-//requireData es una propiedad que devuelve los datos obtenidos de la peticion asincrona
+//se usa width en ambas pq si ponemos height tomaria el alto total de la pantalla y quedaria desproporcionado
+//index, la iteracion de cada elemento
+//row para crear objetos uno al lado del otro, una fila
+//la funcion flecha no crea return, toma la primera linea que encuentra
+//el itemBuilder es una función que se ejecuta por cada elemento de la lista
+//listview sabe que la cantidad que enviaré, si se agrega el builder es para no definir cuantos se enviarán
+//el entity es como voy a tratar el modelo, el modelo es la estructura de datos
+//un modelo es una clase que representa un objeto
+//el usecase es la lógica de negocio, es decir, que voy a hacer con los datos
+//el repository es la abstracción de los datos, es decir, como voy a obtener los datos
+//el datasource es la implementación de los datos, es decir, como voy a obtener los datos
+//el helper es una clase que me ayuda a hacer algo, por ejemplo, una clase que me ayuda a hacer peticiones http
+//los cors son bloqueos de origen cruzado, es decir, que no puedo hacer peticiones a un servidor que no es el mismo que el de mi aplicación
+//para solucionar esto, puedo usar un proxy, que es un servidor intermedio que hace la petición por mí
+//o puedo usar una extensión de navegador que me permita hacer peticiones a cualquier servidor

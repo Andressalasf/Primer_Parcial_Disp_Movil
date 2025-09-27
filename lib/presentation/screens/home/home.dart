@@ -8,9 +8,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text("Home page", style: TextStyle(color: Colors.white)),
-        ),
+        title: Text("Home page", style: TextStyle(color: Colors.white)),
+
         backgroundColor: Colors.indigo,
         //Cambiar el color de la hamburguesa
         iconTheme: IconThemeData(color: Colors.white),
